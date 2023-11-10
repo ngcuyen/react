@@ -6,7 +6,7 @@ import MovieDetail from './pages/MovieDetail/MovieDetail.jsx'
 
 ReactDOM.createRoot(document.getElementById('root')).render(
 	<React.StrictMode>
-		<MovieDetail />
-		{/* <App /> */}
+		{/* <MovieDetail /> */}
+		<App />
 	</React.StrictMode>,
 );
