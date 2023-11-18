@@ -1,8 +1,12 @@
 
-import 'bootstrap/dist/css/bootstrap.css'
-import { useState } from 'react'
-import { Dialog } from '@headlessui/react'
-import { Bars3Icon, XMarkIcon } from '@heroicons/react/24/outline'
+
+import { useEffect, useState } from 'react'
+import { Bars3Icon } from '@heroicons/react/24/outline'
+import Carousel from './components/Carousel/Carousel'
+import { useSelector, useDispatch } from 'react-redux'
+import { getGenresAPI, getMovieAPI, getUpcomingAPI } from './middleware/movieAction.jsx'
+import { Link, useNavigate } from 'react-router-dom'
+import MovieDetail from './pages/MovieDetail/MovieDetail.jsx'
 
 const navigation = [
   { name: 'Find Talent', href: '#' },
@@ -10,18 +14,124 @@ const navigation = [
   { name: 'Jobs', href: '#' },
   { name: 'Go pro', href: '#' },
 ]
+
+//zustand
+//useEffect
+//useParam
+//redux toolkit
+
+/* 
+ ** the callback inside the useEffect is called every time the dependencies array changes
+ ** if you put an empty array [] as dependencies, the callback is called only once when the component is mounted
+ ** if you put nothing as dependencies, the callback is called every time the component is updated
+ ** if you put variables as dependencies, the callback is called every time one of those variables changes
+ */
+
+
+// async function getDataMovie(url) {
+//   const apiKey = import.meta.env.VITE_API_KEY;
+//   const bearer_token = `Bearer ${apiKey}`;
+//   try {
+//     const config = {
+//       headers: {
+//         Authorization: bearer_token
+//       }
+//     };
+//     const res = await axios.get(url, config); // <== Here we use await keywords to get the result of the Promise
+//     //console.log(res.data.results);
+//     return res.data.results;
+//   } catch (err) {
+//     // here display a message to the user or something else
+//     console.error(err.message);
+//   }
+// }
+
+
+
+const renderRelatedMovie = (upMovie) => {
+  return upMovie && upMovie.map((movie, index) => {
+    let { poster_path, title, release_date } = movie
+    return <div className='group relative' key={index}>
+
+      <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
+        <img
+          src={`https://image.tmdb.org/t/p/w500${poster_path}`}
+          alt=''
+          className='h-full w-full object-cover lg:h-full lg:w-full'
+        />
+      </div>
+      <div className='h-15'>
+        <p className='text-xl text-blue-500 font-bold py-3'>{title.length > 40 ? title.slice(0, 15) + '...' : title}</p>
+      </div>
+      <div className='flex justify-between pb-1 text-gray-100' >
+        <span >{release_date}</span>
+        <span>120m</span>
+      </div>
+      <button type="button" className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
+    </div>
+  })
+}
+
+const renderUpcomingMovie = (upMovie, navigate) => {
+  return upMovie && upMovie.map((movie, index) => {
+    let { poster_path, title, release_date, id } = movie
+    return <div className='group relative' key={index}>
+      <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
+        <img
+          src={`https://image.tmdb.org/t/p/w500` + poster_path}
+          alt=''
+          className='h-full w-full object-cover lg:h-full lg:w-full'
+        />
+      </div>
+      <div className='h-15'>
+        <p className='text-xl text-blue-500 font-bold py-3'>{title.length > 30 ? title.slice(0, 20) + '...' : title}</p>
+      </div>
+      <div className='flex justify-between pb-1 text-gray-100' >
+        <span >{release_date}</span>
+        <span>120m</span>
+      </div>
+      <button onClick={() => { navigate(`moviedetail/${id}`) }} type="button" className="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
+    </div>
+  })
+}
+
 function App() {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
+
+  // const [upcoming, setUpcoming] = useState(null);
+  // const [related, setRelated] = useState(null);
+  const movie = useSelector((state) => state.listMovie)
+  const upMovie = useSelector((state) => state.upcomingMovie)
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
+  console.log(movie);
+  useEffect(() => {
+    const asyncMovie = getMovieAPI()
+    dispatch(asyncMovie)
+    const upcoming = getUpcomingAPI()
+    dispatch(upcoming)
+
+    // const genMovie = getGenresAPI()
+    // dispatch(genMovie);
+
+    // (async () => {
+    //   const urlUpcoming = import.meta.env.VITE_DOMAIN_UPCOMING;
+    //   const urlRelated = import.meta.env.VITE_DOMAIN_RATE;
+    //   let data = await getDataMovie(urlUpcoming)
+    //   setUpcoming(data)
+    //   let dataRelated = await getDataMovie(urlRelated)
+    //   setRelated(dataRelated)
+    // })()
+    //getDataMovie().then((resolve) => { setUpcoming(resolve) })
+  }, [])
+
 
   return (
     <div className='bg-gray-900'>
       <nav className="flex items-center justify-between p-6 lg:px-8" aria-label="Global">
-
         <div className="flex lg:hidden">
           <button
             type="button"
             className="-m-2.5 inline-flex items-center justify-center rounded-md p-2.5 text-gray-700"
-            onClick={() => setMobileMenuOpen(true)}
           >
             <span className="sr-only">Open main menu</span>
             <Bars3Icon className="h-6 w-6" aria-hidden="true" />
@@ -34,228 +144,24 @@ function App() {
             </a>
           ))}
         </div>
-        <div className="lg:flex lg:gap-x-8">
-          {/* <img src="../image/logo.png" alt="" width='100px' height='100px' /> */}
+        <div className="-ml-30">
+          <img src="../image/logo.png" alt="" className='h-14 w-14 relative ' />
         </div>
-
         <div className=" lg:flex lg:gap-x-12">
-          <button type="button" class="text-gray-900 bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Login</button>
-          <button type="button" class="text-gray-900 bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Signup</button>
+          <button type="button" className="text-gray-900 bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Login</button>
+          <button type="button" className="text-gray-900 bg-gradient-to-r from-red-200 via-red-300 to-yellow-200 hover:bg-gradient-to-bl focus:ring-4 focus:outline-none focus:ring-red-100 dark:focus:ring-red-400 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2 mb-2">Sign Up</button>
         </div>
       </nav>
-
       <div>
-
-        <div id="default-carousel" className="relative w-full" data-carousel="slide">
-          {/* Carousel wrapper */}
-          <div className="relative h-96 overflow-hidden rounded-lg">
-            {/* Item 1 */}
-            <div className="hidden duration-700 ease-in-out" data-carousel-item>
-              <img src="https://www.adorama.com/alc/wp-content/uploads/2018/11/landscape-photography-tips-yosemite-valley-feature.jpg" className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..." />
-            </div>
-            {/* Item 2 */}
-            <div className="hidden duration-700 ease-in-out" data-carousel-item>
-              <img src="https://cdn.pixabay.com/photo/2012/08/27/14/19/mountains-55067_640.png" className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..." />
-            </div>
-            {/* Item 3 */}
-            <div className="hidden duration-700 ease-in-out" data-carousel-item>
-              <img src="https://d150u0abw3r906.cloudfront.net/wp-content/uploads/2021/10/image2-2-1024x649.png" className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..." />
-            </div>
-            {/* Item 4 */}
-            <div className="hidden duration-700 ease-in-out" data-carousel-item>
-              <img src="https://media.macphun.com/img/uploads/macphun/blog/2063/_1.jpeg?q=75&w=1710&h=906&resize=cover" className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..." />
-            </div>
-            <div className="hidden duration-700 ease-in-out" data-carousel-item>
-              <img src="https://images.pexels.com/photos/147411/italy-mountains-dawn-daybreak-147411.jpeg?cs=srgb&dl=pexels-pixabay-147411.jpg&fm=jpg" className="absolute block w-full -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2" alt="..." />
-            </div>
-          </div>
-          <div className="absolute z-30 flex space-x-3 -translate-x-1/2 bottom-5 left-1/2">
-            <button type="button" className="w-3 h-3 rounded-full" aria-current="true" aria-label="Slide 1" data-carousel-slide-to={0} />
-            <button type="button" className="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 2" data-carousel-slide-to={1} />
-            <button type="button" className="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 3" data-carousel-slide-to={2} />
-            <button type="button" className="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 4" data-carousel-slide-to={3} />
-            <button type="button" className="w-3 h-3 rounded-full" aria-current="false" aria-label="Slide 5" data-carousel-slide-to={4} />
-          </div>
-          <button type="button" className="absolute top-0 left-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-prev>
-            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-              <svg className="w-4 h-4 text-white dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 1 1 5l4 4" />
-              </svg>
-              <span className="sr-only">Previous</span>
-            </span>
-          </button>
-          <button type="button" className="absolute top-0 right-0 z-30 flex items-center justify-center h-full px-4 cursor-pointer group focus:outline-none" data-carousel-next>
-            <span className="inline-flex items-center justify-center w-10 h-10 rounded-full bg-white/30 dark:bg-gray-800/30 group-hover:bg-white/50 dark:group-hover:bg-gray-800/60 group-focus:ring-4 group-focus:ring-white dark:group-focus:ring-gray-800/70 group-focus:outline-none">
-              <svg className="w-4 h-4 text-white dark:text-gray-800" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 6 10">
-                <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="m1 9 4-4-4-4" />
-              </svg>
-              <span className="sr-only">Next</span>
-            </span>
-          </button>
-        </div>
-
+        <Carousel></Carousel>
       </div>
-
       <div>
         <div className='mx-auto max-w-2xl px-4 pb-2 pt-6 sm:px-6 sm:py-24 lg:max-w-7xl lg:px-8'>
           <h2 className='text-6xl font-bold tracking-tight text-gray-100 text-center'>
-            Realated Movie
+            Related Movies
           </h2>
           <div className='mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8'>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
+            {renderRelatedMovie(movie)}
           </div>
 
         </div>
@@ -264,165 +170,10 @@ function App() {
             Upcoming Movies
           </h2>
           <div className='mt-6 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-4 xl:gap-x-8'>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
-            <div className='group relative'>
-              <div className='aspect-h-1 aspect-w-1 w-full overflow-hidden rounded-md bg-gray-200 lg:aspect-none group-hover:opacity-75 lg:h-96'>
-                <img
-                  src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-                  alt='santana'
-                  className='h-full w-full object-cover lg:h-full lg:w-full'
-                />
-              </div>
-              <div>
-                <p className='text-xl text-blue-500 font-bold py-1'>Santana</p>
-              </div>
-              <div className='flex justify-between pb-1' >
-                <span>2003</span>
-                <span>120m</span>
-              </div>
-
-              <button type="button" class="text-white bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-blue-300 dark:focus:ring-blue-800 font-medium rounded-lg text-sm py-2.5 text-center mr-2 mb-2 w-full">View Detail</button>
-
-            </div>
+            {renderUpcomingMovie(upMovie, navigate)}
           </div>
-
         </div>
       </div>
-
       <footer className="bg-gray-900 dark:bg-gray-900">
         <div className="mx-auto w-full max-w-screen-xl p-4 py-6 lg:py-8">
           <div className="md:flex md:justify-between">
@@ -507,11 +258,8 @@ function App() {
           </div>
         </div>
       </footer>
-
     </div>
   )
-
-
 }
 
 export default App;

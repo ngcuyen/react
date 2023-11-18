@@ -1,8 +1,26 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { useParams } from 'react-router-dom';
+import { getGenresAPI } from '../../middleware/movieAction';
 
 const MovieDetail = () => {
+	let { movieId } = useParams();
+	const upMovie = useSelector((state) => state.upcomingMovie)
+	const genres = useSelector((state) => state.genres)
+	const dispatch = useDispatch()
+
+	const [movie, setMovie] = useState({})
+
+
+	useEffect(() => {
+		const selectedMovie = upMovie.find((movie) => movie.id === +movieId)
+		setMovie(selectedMovie)
+		const genreMovie = getGenresAPI()
+		dispatch(genreMovie)
+		console.log(movie);
+	}, [])
 	return (
-		<>
+		<div className='bg-gray-900'>
 			<div className='p-5'>
 				<form className='flex items-center justify-center mx-[400px]'>
 					<label htmlFor='voice-search' className='sr-only'>
@@ -43,31 +61,32 @@ const MovieDetail = () => {
 				</form>
 			</div>
 			<div className='flex justify-center'>
-				<a className='flex max-w-4xl flex-col items-center bg-white border shadow md:flex-row'>
+				<a className='flex max-w-4xl flex-col items-center bg-gray-600 border shadow md:flex-row'>
 					<img
 						className='object-cover w-[40%] h-[35rem]'
-						src='https://image.tmdb.org/t/p/w500/9Rj8l6gElLpRL7Kj17iZhrT5Zuw.jpg'
-						alt
+						src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+						alt=''
 					/>
 					<div className='flex flex-col p-6 leading-normal'>
 						<h2 className='mb-1 text-4xl font-bold tracking-tight text-gray-900'>
-							SANTANA
+							{movie.title}
 						</h2>
-						<p className='mb-4 font-normal text-gray-700 dark:text-gray-400'>
-							The Dark Knight, 2008
+						<p className='mb-4 font-normal text-gray-700 dark:text-gray-50'>
+							{movie.original_title}
 						</p>
-						<p className='mb-10 text-sm font-normal leading-6 text-gray-700 dark:text-gray-400 text-justify'>
-							Here are the biggest enterprise technology acquisitions of 2021 so
+						<p className='mb-10 text-sm font-normal leading-6 text-gray-50 dark:text-gray-50 text-justify'>
+							{/* Here are the biggest enterprise technology acquisitions of 2021 so
 							far, in reverse chronological order.Here are the biggest
 							enterprise technology acquisitions of 2021 so far, in reverse
 							chronological order. Here are the biggest enterprise technology
 							acquisitions of 2021 so far, in reverse chronological order. Here
 							are the biggest enterprise technology acquisitions of 2021 so far,
-							in reverse chronological order.
+							in reverse chronological order. */}
+							{movie.overview}
 						</p>
 
 						<div className='rating mb-5'>
-							<p className='mb-2 text-sm font-300 italic text-gray-500 dark:text-gray-400'>
+							<p className='mb-2 text-sm font-300 italic text-gray-50 dark:text-gray-50'>
 								Rating:
 							</p>
 							<div className='movie-rating mb-2'>
@@ -109,7 +128,7 @@ const MovieDetail = () => {
 										<path d='M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z' />
 									</svg>
 									<svg
-										className='w-4 h-4 text-gray-300 mr-1 dark:text-gray-500'
+										className='w-4 h-4 text-gray-300 mr-1 dark:text-gray-50'
 										aria-hidden='true'
 										xmlns='http://www.w3.org/2000/svg'
 										fill='currentColor'
@@ -117,8 +136,8 @@ const MovieDetail = () => {
 									>
 										<path d='M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z' />
 									</svg>
-									<p className='ml-2 text-sm font-medium text-gray-500 dark:text-gray-400'>
-										8.5 / 10
+									<p className='ml-2 text-sm font-medium text-gray-50 dark:text-gray-50'>
+										{movie.vote_average}
 									</p>
 								</div>
 							</div>
@@ -161,7 +180,7 @@ const MovieDetail = () => {
 										<path d='M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z' />
 									</svg>
 									<svg
-										className='w-4 h-4 text-gray-300 mr-1 dark:text-gray-500'
+										className='w-4 h-4 text-gray-300 mr-1 dark:text-gray-50'
 										aria-hidden='true'
 										xmlns='http://www.w3.org/2000/svg'
 										fill='currentColor'
@@ -169,41 +188,44 @@ const MovieDetail = () => {
 									>
 										<path d='M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z' />
 									</svg>
-									<p className='ml-2 text-sm font-medium text-gray-500 dark:text-gray-400'>
-										8.5/10 - IMDb
+									<p className='ml-2 text-sm font-medium text-gray-50 dark:text-gray-50'>
+										{movie.vote_count}
 									</p>
 								</div>
 							</div>
 						</div>
 						<div className='release-date flex'>
-							<p className='mb-2 text-sm font-300 italic text-gray-500 dark:text-gray-400'>
+							<p className='mb-2 text-sm font-300 text-gray-500 dark:text-yellow-300'>
 								Release Date:
 							</p>
-							<span className='px-6 text-sm font-medium text-gray-500 dark:text-gray-400'>
-								2023-10-25
+							<span className='px-6 text-sm font-medium text-gray-500 dark:text-gray-50'>
+								{movie.release_date}
 							</span>
 						</div>
 						<div className='popularity flex'>
-							<p className='mb-2 text-sm font-300 italic text-gray-500 dark:text-gray-400'>
+							<p className='mb-2 text-sm font-300  text-gray-500 dark:text-yellow-300'>
 								Popularity:
 							</p>
-							<span className='px-10 text-sm font-medium text-gray-500 dark:text-gray-400'>
-								2058.036
+							<span className='px-10 text-sm font-medium text-gray-500 dark:text-gray-50'>
+								{movie.popularity}
 							</span>
 						</div>
 						<div className='genres flex'>
-							<p className='mb-2 text-sm font-300 italic text-gray-500 dark:text-gray-400'>
+							<p className='mb-2 text-sm font-300  text-gray-500 dark:text-yellow-300'>
 								Genres:
 							</p>
-							<span className='px-14 text-sm font-medium text-gray-500 dark:text-gray-400'>
-								Horror, Mystery
+							<span className='px-14 text-sm font-medium text-gray-500 dark:text-gray-50'>
+								{/* {movie.genre_ids.map((item) => {
+									return genres.filter((gen) => gen.id === item)
+								}).flat(2).map((gen, index) => (<li key={index}>{gen.name}</li>))} */}
+								{/* {movie.genre_ids.join(' ')} */}
 							</span>
 						</div>
 						<div className='runtime flex'>
-							<p className='mb-2 text-sm font-300 italic text-gray-500 dark:text-gray-400'>
+							<p className='mb-2 text-sm font-300  text-gray-500 dark:text-yellow-300'>
 								Runtime:
 							</p>
-							<span className='px-12 text-sm font-medium text-gray-500 dark:text-gray-400'>
+							<span className='px-12 text-sm font-medium text-gray-500 dark:text-gray-50'>
 								1 hour 50 minutes
 							</span>
 						</div>
@@ -255,7 +277,7 @@ const MovieDetail = () => {
 					</div>
 				</div>
 			</div>
-		</>
+		</div>
 	);
 };
 
